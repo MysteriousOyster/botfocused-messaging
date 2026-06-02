@@ -1,9 +1,32 @@
-use axum::{routing::get, Router};
+use axum::{
+    http::{HeaderValue, Method},
+    routing::get,
+    Router,
+};
+use tower_http::cors::CorsLayer;
 use tower_service::Service;
 use worker::*;
 
 fn router() -> Router {
-    Router::new().route("/", get(root))
+    Router::new()
+        .layer(
+            CorsLayer::new()
+                .allow_origin(
+                    "https://api.bot.leifbarton.dev"
+                        .parse::<HeaderValue>()
+                        .unwrap(),
+                )
+                .allow_methods([
+                    Method::GET,
+                    Method::POST,
+                    Method::OPTIONS,
+                    Method::PUT,
+                    Method::PATCH,
+                    Method::DELETE,
+                    Method::HEAD,
+                ]),
+        )
+        .route("/", get(root))
 }
 
 #[event(fetch)]

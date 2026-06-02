@@ -3,4 +3,8 @@ main = "build/index.js"
 compatibility_date = "2026-06-02"
 
 [build]
-command = "cargo install -q \"worker-build@^0.8\" && worker-build --release --panic-unwind"
+command = "cargo install -q \"worker-build@^0.8\" && worker-build --release"
+
+[[routes]]
+pattern="api.bot.leifbarton.dev"
+custom_domain=true
