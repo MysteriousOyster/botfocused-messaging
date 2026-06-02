@@ -29,7 +29,8 @@ fn router() -> Router {
                 .allow_headers([header::CONTENT_TYPE, header::AUTHORIZATION])
                 .allow_credentials(true),
         )
-        .route("/", get(root))
+        .route("/", get(root).post(root))
+        .route("/git", get(git_info))
 }
 
 #[event(fetch)]
@@ -43,4 +44,15 @@ async fn fetch(
 
 pub async fn root() -> &'static str {
     "hello!"
+}
+
+pub async fn git_info() -> &'static str {
+    concat!(
+        "SHA: ",
+        env!("VERGEN_GIT_SHA"),
+        "\nBranch: ",
+        env!("VERGEN_GIT_BRANCH"),
+        "\nCommit Message: ",
+        env!("VERGEN_GIT_COMMIT_MESSAGE")
+    )
 }
