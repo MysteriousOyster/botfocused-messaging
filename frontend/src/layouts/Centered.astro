@@ -5,6 +5,7 @@
  */
 
 import Layout from "./Layout.astro";
+import ServerHealth from "../components/ServerHealth.svelte";
 ---
 
 <Layout>
@@ -14,6 +15,7 @@ import Layout from "./Layout.astro";
       <li><a href="/">Home</a></li>
       <li><a href="/about">About</a></li>
       <li><a href="https://github.com/MysteriousOyster/botfocused-messaging" target="_blank" rel="noopener norefferer">GitHub</a></li>
+      <li><ServerHealth client:load/></li>
     </footer>
   </div>
 </Layout>
@@ -43,7 +45,7 @@ import Layout from "./Layout.astro";
     flex-wrap: nowrap;
     justify-content: center;
     display: flex;
-    gap: 15px;
+    gap: 20px;
   }
   footer li {
     list-style: none;

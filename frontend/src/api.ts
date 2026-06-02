@@ -14,3 +14,13 @@ export async function isApiHealthy() {
     return false;
   }
 }
+
+export async function createUser(username: string, password: string): Promise<Response> {
+  return await fetch(API_URL + "newuser", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+  })
+}

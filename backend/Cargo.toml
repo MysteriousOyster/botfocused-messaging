@@ -11,11 +11,15 @@ authors = ["MysteriousOyster <leifwilliambarton@gmail.com>"]
 crate-type = ["cdylib"]
 
 [dependencies]
-worker = { version = "0.8", features = ['http', 'axum'] }
+worker = { version = "0.8", features = ['http', 'axum', 'd1'] }
 worker-macros = { version = "0.8", features = ['http'] }
-axum = { version = "0.8", default-features = false }
+axum = { version = "0.8", default-features = false, features = ["json"] }
 tower-service = "0.3.3"
 tower-http = { version = "0.6.11", features = ["cors"] }
+serde = { version = "1.0.228", features = ["derive"] }
+argon2 = { version = "0.5.3", features = ["std"] }
+getrandom = { version = "0.2.17", features = ["js"] }
+axum-extra = { version = "0.12.6", features = ["cookie-private"] }
 
 [build-dependencies]
 vergen-gitcl = { version = "9.1.0", features = ["build"] }

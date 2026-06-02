@@ -51,4 +51,12 @@ import { Font } from "astro:assets"
   		--border-main: var(--txt-main);
 		}
 	}
+	:global(input), :global(button) {
+    font-family: inherit;
+    background-color: var(--bg-dark);
+    border: 1px var(--txt-main) solid;
+	}
+	:global(button) {
+	  cursor: pointer;
+	}
 </style>

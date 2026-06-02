@@ -14,13 +14,14 @@
 {/await}
 
 <style>
-  span[data-health] {
-    font-weight: bold;
+  p {
+    margin: 0;
   }
   span[data-health = false] {
     color: var(--error);
+    font-weight: bold;
   }
   span[data-health = true] {
-    color: var(--success);
+    color: inherit;
   }
 </style>
