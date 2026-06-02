@@ -1,5 +1,5 @@
 use axum::{
-    http::{HeaderValue, Method},
+    http::{header, HeaderValue, Method},
     routing::get,
     Router,
 };
@@ -11,11 +11,7 @@ fn router() -> Router {
     Router::new()
         .layer(
             CorsLayer::new()
-                .allow_origin(
-                    "https://bot.leifbarton.dev"
-                        .parse::<HeaderValue>()
-                        .unwrap(),
-                )
+                .allow_origin("https://bot.leifbarton.dev".parse::<HeaderValue>().unwrap())
                 .allow_methods([
                     Method::GET,
                     Method::POST,
@@ -24,7 +20,9 @@ fn router() -> Router {
                     Method::PATCH,
                     Method::DELETE,
                     Method::HEAD,
-                ]),
+                ])
+                .allow_headers([header::CONTENT_TYPE, header::AUTHORIZATION])
+                .allow_credentials(true),
         )
         .route("/", get(root))
 }
