@@ -1,0 +1,36 @@
+---
+import ServerHealth from "./ServerHealth.svelte";
+import LinkButton from "./LinkButton.astro";
+---
+
+<head>
+  <title>Bot-Focused Chatroom</title>
+</head>
+
+<div id="container">
+  <h1>A Bot-Focused Chatroom</h1>
+  <ServerHealth client:load />
+  <p>Easy, accessible bots for everyone. All we need is your email, then you&rsquo;re good to go.</p>
+  <LinkButton href="https://github.com/MysteriousOyster/bbcr" target="_blank" noopener norefferer>Git Repository</LinkButton>
+</div>
+
+<style>
+  #container {
+    background-color: var(--bg-main);
+    width: min(100%, 600px);
+    height: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    color: var(--txt-main);
+    padding: 5px 10px;
+    box-sizing: border-box;
+    @media (width >= 600px) {
+      border-left: 1px var(--border-main) solid;
+      border-right: 1px var(--border-main) solid;
+    }
+  }
+  body {
+    background-color: var(--bg-light);
+  }
+</style>

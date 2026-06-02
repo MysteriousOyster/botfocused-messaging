@@ -1,0 +1,44 @@
+---
+import { Font } from "astro:assets"
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="generator" content={Astro.generator} />
+		<Font cssVariable="--font-ss4" preload />
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
+
+<style>
+	html,
+	body {
+		margin: 0;
+		width: 100%;
+		height: 100%;
+		font-family: var(--font-ss4);
+	}
+	:root {
+	  --bg-light: #f4f4f4;
+		--bg-main: #eee;
+		--bg-dark: #ddd;
+		--txt-main: #444;
+		--border-main: var(--txt-main);
+	}
+	@media (prefers-color-scheme: dark) {
+	  :root {
+  	  --bg-light: #333;
+  		--bg-main: #363636;
+  		--bg-dark: #444;
+  		--txt-main: #eee;
+  		--border-main: var(--txt-main);
+		}
+	}
+</style>
