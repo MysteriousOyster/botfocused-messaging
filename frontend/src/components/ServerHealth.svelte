@@ -3,7 +3,7 @@
 </script>
 
 {#await isApiHealthy()}
-  <p>API status: loading...</p>
+  <p>API status: loading... <noscript style:color="var(--error)">Enable Javascript to check API health</noscript></p>
 {:then health}
   <p>API status: <span data-health={health}>{health ? "healthy" : "diseased"}</span></p>
 {/await}
@@ -13,9 +13,9 @@
     font-weight: bold;
   }
   span[data-health = false] {
-    color: #e55;
+    color: var(--error);
   }
   span[data-health = true] {
-    color: #595;
+    color: var(--success);
   }
 </style>

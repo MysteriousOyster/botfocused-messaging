@@ -1,0 +1,4 @@
+/*
+  Access-Control-Allow-Origin: https://api.bot.leifbarton.dev
+  Access-Control-Allow-Methods: GET, POST, OPTIONS
+  Access-Control-Allow-Headers: Content-Type, Authorization
