@@ -1,5 +1,8 @@
+
+
 {
   "name": "frontend",
+  "license": "OSL-3.0",
   "type": "module",
   "version": "0.0.1",
   "engines": {

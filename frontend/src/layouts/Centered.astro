@@ -1,0 +1,57 @@
+---
+/*
+ * Copyright (C) 2026 Leif Barton
+ * Licensed under the Open Software License 3.0
+ */
+
+import Layout from "./Layout.astro";
+---
+
+<Layout>
+  <div id="container">
+    <slot />
+    <footer>
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="https://github.com/MysteriousOyster/botfocused-messaging" target="_blank" rel="noopener norefferer">GitHub</a></li>
+    </footer>
+  </div>
+</Layout>
+
+<style>
+  #container {
+    background-color: var(--bg-main);
+    width: min(100%, 600px);
+    height: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    color: var(--txt-main);
+    padding: 5px 10px;
+    box-sizing: border-box;
+    @media (width >= 600px) {
+      border-left: 1px var(--border-main) solid;
+      border-right: 1px var(--border-main) solid;
+    }
+  }
+  body {
+    background-color: var(--bg-light);
+  }
+  footer {
+    margin-top: auto;
+    width: 100%;
+    flex-wrap: nowrap;
+    justify-content: center;
+    display: flex;
+    gap: 15px;
+  }
+  footer li {
+    list-style: none;
+    width: fit-content;
+    color: var(--txt-light);
+  }
+  footer a {
+    color: inherit;
+    text-decoration: none;
+  }
+</style>

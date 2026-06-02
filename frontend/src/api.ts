@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Leif Barton
+ * Licensed under the Open Software License 3.0
+ */
+ 
 import { API_URL } from "./config";
 
 export async function isApiHealthy() {
