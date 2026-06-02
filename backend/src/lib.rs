@@ -14,6 +14,8 @@ use worker::*;
 
 fn router() -> Router {
     Router::new()
+        .route("/", get(root).post(root))
+        .route("/git", get(git_info))
         .layer(
             CorsLayer::new()
                 .allow_origin("https://bot.leifbarton.dev".parse::<HeaderValue>().unwrap())
@@ -29,8 +31,6 @@ fn router() -> Router {
                 .allow_headers([header::CONTENT_TYPE, header::AUTHORIZATION])
                 .allow_credentials(true),
         )
-        .route("/", get(root).post(root))
-        .route("/git", get(git_info))
 }
 
 #[event(fetch)]
