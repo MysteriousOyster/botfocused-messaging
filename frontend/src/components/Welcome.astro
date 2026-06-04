@@ -6,6 +6,7 @@
 
 import LinkButton from "./LinkButton.astro";
 import FlexHorizontal from "./FlexHorizontal.astro";
+import ConditionalAccountButtons from "./ConditionalAccountButtons.svelte";
 ---
 
 <head>
@@ -24,4 +25,7 @@ import FlexHorizontal from "./FlexHorizontal.astro";
     target="_blank"
     rel="noopener norefferer">Git Repository</LinkButton
   >
+</FlexHorizontal>
+<FlexHorizontal>
+  <ConditionalAccountButtons client:load />
 </FlexHorizontal>

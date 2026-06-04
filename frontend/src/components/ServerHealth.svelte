@@ -4,7 +4,7 @@
    * Licensed under the Open Software License 3.0
    */
    
-  import { isApiHealthy } from "../api";
+  import { isApiHealthy } from "../api.svelte";
 </script>
 
 {#await isApiHealthy()}

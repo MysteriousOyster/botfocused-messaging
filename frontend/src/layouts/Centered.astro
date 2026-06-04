@@ -15,7 +15,7 @@ import ServerHealth from "../components/ServerHealth.svelte";
       <li><a href="/">Home</a></li>
       <li><a href="/about">About</a></li>
       <li><a href="https://github.com/MysteriousOyster/botfocused-messaging" target="_blank" rel="noopener norefferer">GitHub</a></li>
-      <li><ServerHealth client:load/></li>
+      <li><ServerHealth client:load transition:persist/></li>
     </footer>
   </div>
 </Layout>
@@ -42,7 +42,7 @@ import ServerHealth from "../components/ServerHealth.svelte";
   footer {
     margin-top: auto;
     width: 100%;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     justify-content: center;
     display: flex;
     gap: 20px;
@@ -55,5 +55,8 @@ import ServerHealth from "../components/ServerHealth.svelte";
   footer a {
     color: inherit;
     text-decoration: none;
+  }
+  :global(button) {
+    width: fit-content;
   }
 </style>

@@ -3,8 +3,9 @@
  * Copyright (C) 2026 Leif Barton
  * Licensed under the Open Software License 3.0
  */
- 
+
 import { Font } from "astro:assets"
+import { ClientRouter, fade } from "astro:transitions"
 ---
 
 <!doctype html>
@@ -16,8 +17,9 @@ import { Font } from "astro:assets"
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
 		<Font cssVariable="--font-ss4" preload />
+		<ClientRouter />
 	</head>
-	<body>
+	<body transition:animate={fade({duration: "0.1s"})}>
 		<slot />
 	</body>
 </html>
@@ -34,29 +36,52 @@ import { Font } from "astro:assets"
 	  --bg-light: #f4f4f4;
 		--bg-main: #eee;
 		--bg-dark: #ddd;
+		--bg-disabled: #ccc;
 		--txt-main: #444;
 		--txt-light: #888;
 		--border-main: var(--txt-main);
 
 		--error: #e55;
 		--success: #595;
+
+    --link: #0066cc;
+    --link-visited: #6b46c1;
+    --link-active: #004080;
 	}
 	@media (prefers-color-scheme: dark) {
 	  :root {
   	  --bg-light: #333;
   		--bg-main: #363636;
   		--bg-dark: #444;
+      --bg-disabled: #555;
   		--txt-main: #eee;
       --txt-light: #aaa;
   		--border-main: var(--txt-main);
+      --link: #66b3ff;
+      --link-visited: #b794f4;
+      --link-active: #3d9eff;
 		}
 	}
 	:global(input), :global(button) {
     font-family: inherit;
     background-color: var(--bg-dark);
     border: 1px var(--txt-main) solid;
+    color: inherit;
+	}
+	:global(input:disabled), :global(button:disabled) {
+    background-color: var(--bg-disabled);
+    cursor: not-allowed;
 	}
 	:global(button) {
 	  cursor: pointer;
+	}
+	:global(a) {
+	  color: var(--link);
+	}
+	:global(a:active) {
+  	color: var(--link-active);
+	}
+	:global(a:visited) {
+  	color: var(--link-visited);
 	}
 </style>

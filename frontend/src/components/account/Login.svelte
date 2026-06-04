@@ -4,7 +4,7 @@
    * Licensed under the Open Software License 3.0
    */
 
-  import { isApiHealthy, createUser } from "../../api.svelte";
+  import { isApiHealthy, logIn } from "../../api.svelte";
   import { navigate } from "astro:transitions/client";
 
   let username = $state("");
@@ -16,7 +16,8 @@
     event.preventDefault();
     disabled = true;
     try {
-      const res = await createUser(username, password);
+      const res = await logIn(username, password);
+      console.log(res);
       if (!res.ok) {
         console.error(res);
         error = await res.text();
@@ -33,7 +34,7 @@
   }
 </script>
 
-<h1>Create a New Account</h1>
+<h1>Log In To Account</h1>
 {#await isApiHealthy()}
   <p>Loading form...</p>
 {:then healthy}
@@ -51,11 +52,12 @@
         placeholder="password"
         {disabled}
       />
-      <button type="submit" {disabled}>Do it</button>
+      <button type="submit" {disabled}>Log In</button>
     </form>
+    <p>Don&rsquo;t have an account? <a href="/account/new">Create one</a></p>
     <p>
-      By creating an account you agree to having a cookie stored on your device
-      so we know you&rsquo;re logged in.
+      By signing in you agree to having a cookie stored on your device so we
+      know you&rsquo;re logged in.
     </p>
     {#if error}
       <p style:color="var(--error)">{error}</p>

@@ -1,11 +1,13 @@
----
-/*
- * Copyright (C) 2026 Leif Barton
- * Licensed under the Open Software License 3.0
- */
----
+<script lang="ts">
+  /*
+  * Copyright (C) 2026 Leif Barton
+  * Licensed under the Open Software License 3.0
+  */
 
-<a {...Astro.props}><slot /></a>
+  let {children, ...props} = $props();
+</script>
+
+<a {...props}>{@render children()}</a>
 <style>
   a,
   a:link,

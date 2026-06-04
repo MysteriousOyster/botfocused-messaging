@@ -3,15 +3,22 @@
 // Example:
 [
     {
-        "label": "Run Backend",
-        "command": "bunx wrangler dev",
+        "label": "Deploy Backend",
+        "command": "bunx wrangler deploy --env prod",
         "use_new_terminal": true,
-        "cwd": "$ZED_WORKTREE_ROOT\\backend"
+        "cwd": "$ZED_WORKTREE_ROOT\\backend",
+        "hide": "on_success",
+    },
+    {
+        "label": "Run Backend",
+        "command": "bunx wrangler dev --env dev",
+        "use_new_terminal": true,
+        "cwd": "$ZED_WORKTREE_ROOT\\backend",
     },
     {
         "label": "Run Frontend",
         "command": "bun run dev",
         "use_new_terminal": true,
-        "cwd": "$ZED_WORKTREE_ROOT\\frontend"
+        "cwd": "$ZED_WORKTREE_ROOT\\frontend",
     },
 ]
