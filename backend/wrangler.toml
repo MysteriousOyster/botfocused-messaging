@@ -5,6 +5,20 @@ name = "backend"
 main = "build/index.js"
 compatibility_date = "2026-06-02"
 
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
+invocation_logs = true
+
+[observability.traces]
+enabled = false
+persist = true
+head_sampling_rate = 1
 
 [build]
 command = "cargo install -q \"worker-build@^0.8\" && worker-build --release"
@@ -28,10 +42,6 @@ database_name="bbcr"
 database_id="03f490ed-bd15-4d0c-ab2b-f25ef7bc895b"
 remote=true
 
-
-[observability.logs]
-enabled = false
-invocation_logs = true
 
 [[routes]]
 pattern="api.bot.leifbarton.dev"

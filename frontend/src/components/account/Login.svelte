@@ -4,8 +4,9 @@
    * Licensed under the Open Software License 3.0
    */
 
-  import { isApiHealthy, logIn } from "../../api.svelte";
+  import { amISignedIn, logIn } from "../../api.svelte";
   import { navigate } from "astro:transitions/client";
+  import Redirect from "../bits/Redirect.svelte";
 
   let username = $state("");
   let password = $state("");
@@ -35,10 +36,10 @@
 </script>
 
 <h1>Log In To Account</h1>
-{#await isApiHealthy()}
+{#await amISignedIn()}
   <p>Loading form...</p>
-{:then healthy}
-  {#if healthy}
+{:then signedIn}
+  {#if !signedIn}
     <form onsubmit={handleSubmit}>
       <input
         type="text"
@@ -63,9 +64,12 @@
       <p style:color="var(--error)">{error}</p>
     {/if}
   {:else}
-    <p>
-      Uh oh! We can&rsquo;t connect right now. Check your internet connection
-      and try again in a few minutes.
-    </p>
+    <p>Looks like you&rsquo;re already signed in.</p>
+    <Redirect href="/account/me" countdown={5}/>
   {/if}
+{:catch}
+  <p>
+    Uh oh! We can&rsquo;t connect right now. Check your internet connection and
+    try again in a few minutes.
+  </p>
 {/await}
