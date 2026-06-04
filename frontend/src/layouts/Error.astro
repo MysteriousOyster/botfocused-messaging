@@ -1,0 +1,34 @@
+---
+import Layout from "./Layout.astro";
+---
+<Layout>
+  <div id="container">
+    <main>
+      <slot />
+    </main>
+  </div>
+</Layout>
+<style>
+  body {
+    display: flow-root;
+    background-color: var(--bg-light);
+    color: var(--txt-main);
+  }
+  #container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  main {
+    width: min(100%, 300px);
+    border: 1px var(--txt-main) solid;
+    background-color: var(--bg-main);
+    padding: 10px;
+    box-sizing: border-box;
+    margin: 20px;
+  }
+  :global(h1) {
+    font-size: 3em;
+    margin: 1rem 0;
+  }
+</style>
