@@ -5,7 +5,7 @@
 
 use std::sync::Arc;
 
-#[derive(Clone, Debug, Deserialize_repr, Serialize_repr)]
+#[derive(Clone, Debug, Deserialize_repr, Serialize_repr, PartialEq, PartialOrd)]
 #[repr(u8)]
 enum PermissionLevel {
     YetToVerify = 20,
@@ -15,7 +15,8 @@ enum PermissionLevel {
 }
 
 use argon2::{
-    Argon2, PasswordHash, PasswordHasher, PasswordVerifier, password_hash::{self, SaltString, rand_core::OsRng}
+    password_hash::{self, rand_core::OsRng, SaltString},
+    Argon2, PasswordHash, PasswordHasher, PasswordVerifier,
 };
 use axum::{
     extract::{FromRef, FromRequestParts, State},
@@ -33,6 +34,8 @@ use tower_http::cors::CorsLayer;
 use tower_service::Service;
 use worker::*;
 
+/// The shared data of the app.
+/// Stores the key used to encrypt the cookies as well as the database.
 #[derive(Clone, Debug)]
 pub struct AppState {
     db: Arc<D1Database>,
@@ -53,6 +56,7 @@ async fn fetch(
 ) -> Result<axum::http::Response<axum::body::Body>> {
     let database = env.d1("DB").unwrap();
 
+    // The allowed_origin is changed depending on whether in a development or release environment.
     let allowed_origin = if env
         .var("ENVENV")
         .map(|v| v.to_string() == "dev")
@@ -97,6 +101,7 @@ async fn fetch(
     Ok(router.call(req).await?)
 }
 
+/// The format of a user from [`get_users`]
 #[derive(Deserialize, Serialize)]
 struct UserDataRow {
     id: String,
@@ -105,6 +110,8 @@ struct UserDataRow {
     permission: PermissionLevel,
 }
 
+/// Dumps the contents of the user table of the database.
+// TODO: Remove eventually
 #[worker::send]
 pub async fn get_users(State(state): State<AppState>) -> Json<Vec<UserDataRow>> {
     let db = &*state.db;
@@ -118,18 +125,26 @@ pub async fn get_users(State(state): State<AppState>) -> Json<Vec<UserDataRow>> 
     Json(res)
 }
 
+/// The data sent to a request to [`new_user`]
 #[derive(Deserialize)]
 struct NewUserRequest {
     username: String,
     password: String,
 }
 
+/// The structure of the session cookie that is stored when logging in.
 #[derive(Serialize, Deserialize)]
 struct SessionCookie {
     id: String,
     permission: PermissionLevel,
 }
 
+/// Guard for only allowing people with a valid session cookie to continue.
+///
+/// **IMPORTANT**
+///
+/// Although someone may have a UserSession, that does not mean they are verified and should be trusted with a certain resource.
+/// Use [`VerifiedUserSession`] if unsure.
 #[derive(Clone, Debug, Serialize)]
 pub struct UserSession {
     id: String,
@@ -164,7 +179,6 @@ where
                     format!("Cookie error: {e}"),
                 )
             })?;
-        console_log!("{jar:?}");
         let session_cookie = jar
             .get("session")
             .ok_or((StatusCode::UNAUTHORIZED, "Please log in first.".into()))?;
@@ -179,6 +193,43 @@ where
     }
 }
 
+/// Guard for only allowing people at or above [`PermissionLevel::Verified`] to access the resource.
+pub struct VerifiedUserSession {
+    id: String,
+    permission: PermissionLevel,
+}
+
+impl TryFrom<UserSession> for VerifiedUserSession {
+    type Error = String;
+    fn try_from(value: UserSession) -> std::result::Result<Self, Self::Error> {
+        if value.permission < PermissionLevel::Verified {
+            Err("You must be verified.".into())
+        } else {
+            Ok(Self {
+                id: value.id,
+                permission: value.permission,
+            })
+        }
+    }
+}
+
+impl<S> FromRequestParts<S> for VerifiedUserSession
+where
+    S: Send + Sync,
+    Key: FromRef<S>,
+{
+    type Rejection = <UserSession as FromRequestParts<S>>::Rejection;
+    async fn from_request_parts(
+        parts: &mut axum::http::request::Parts,
+        state: &S,
+    ) -> std::result::Result<Self, Self::Rejection> {
+        let session = parts.extract_with_state::<UserSession, S>(state).await?;
+        session.try_into().map_err(|e| (StatusCode::FORBIDDEN, e))
+    }
+}
+
+/// Sets the session cookie.
+/// A [`PrivateCookieJar`] is taken, modified, and returned. Not via reference, but via ownership.
 fn set_session(
     jar: PrivateCookieJar,
     cookie: SessionCookie,
@@ -202,12 +253,14 @@ fn get_session(jar: PrivateCookieJar) -> Result<SessionCookie, serde_json::Error
 }
  */
 
+/// After [`new_user`] creates a user, this information is returned by the database and used to identify the ID and permission level of the new user.
 #[derive(Deserialize, Clone, Debug)]
 struct InsertedUser {
     id: String,
     permission: PermissionLevel,
 }
 
+/// Presentable, public and nonsensitive format of user information that can be sent to any user.
 #[derive(Serialize, Clone, Debug)]
 struct User {
     id: String,
@@ -225,6 +278,7 @@ impl From<UserDataRow> for User {
     }
 }
 
+/// Gets information from the database about the user identified by the current session cookie. Information presented as [`User`].
 #[worker::send]
 pub async fn me_user(State(state): State<AppState>, me: UserSession) -> Json<User> {
     let db = &*state.db;
@@ -239,6 +293,10 @@ pub async fn me_user(State(state): State<AppState>, me: UserSession) -> Json<Use
     Json(res.into())
 }
 
+/// Create a new user.
+/// Returns either successfully or with error 500 along with a message.
+/// Also stores a session cookie for the newly created user.
+// TODO: Ensure duplicates are not categorized as an internal server error
 #[worker::send]
 pub async fn new_user(
     State(state): State<AppState>,
@@ -266,7 +324,7 @@ pub async fn new_user(
         .bind(&[
             payload.username.into(),
             format!("{password}").into(),
-            (PermissionLevel::Verified as u8).into(),
+            (PermissionLevel::YetToVerify as u8).into(),
         ])
         .unwrap();
     let inserted_user = prepared
@@ -294,10 +352,13 @@ pub async fn new_user(
     })
 }
 
+/// Root of the server. Useful for pinging to check server health. Always returns "hello!"
 pub async fn root() -> &'static str {
     "hello!"
 }
 
+/// Information about the status of the git repository of the project at compile-time.
+/// Includes the SHA, branch, and latest commit message. KV pairs seperated by a colon and a space (`: `)
 pub async fn git_info() -> &'static str {
     concat!(
         "SHA: ",
@@ -309,6 +370,8 @@ pub async fn git_info() -> &'static str {
     )
 }
 
+/// Checks if the user has a valid [`UserSession`] or not.
+/// Returns "yep" or "nope"
 #[worker::send]
 async fn am_i_in(
     session: Result<UserSession, (StatusCode, String)>,
@@ -320,23 +383,29 @@ async fn am_i_in(
     }
 }
 
+/// Removes the session cookie
 pub async fn log_out(_session: UserSession, jar: PrivateCookieJar) -> PrivateCookieJar {
     remove_session(jar)
 }
 
+/// Request given to [`log_in`]
 #[derive(Clone, Deserialize, Debug)]
 struct LoginForm {
     username: String,
     password: String,
 }
 
+/// Response from the database query executed by [`log_in`]
 #[derive(Deserialize, Clone, Debug)]
 struct LoginDatabaseResponse {
     id: String,
     password: String,
-    permission: PermissionLevel
+    permission: PermissionLevel,
 }
 
+/// Checks the username against the hashed password stored in the database. If successful, adds the session cookie.
+/// Returns a status code along with a user-friendly message.
+/// Status codes returned are: 401, 422, 500
 #[worker::send]
 async fn log_in(
     State(state): State<AppState>,
@@ -345,7 +414,8 @@ async fn log_in(
 ) -> Result<PrivateCookieJar, (StatusCode, String)> {
     let argon2 = Argon2::default();
     let db = &*state.db;
-    let prepared = db.prepare("SELECT id, password, permission FROM user WHERE username == ?1")
+    let prepared = db
+        .prepare("SELECT id, password, permission FROM user WHERE username == ?1")
         .bind(&[form.username.into()])
         .map_err(|e| {
             (
@@ -353,13 +423,40 @@ async fn log_in(
                 format!("Unprocessable username: {e}."),
             )
         })?;
-    let user: LoginDatabaseResponse = prepared.first(None).await.expect("prepared.first should not fail, as it uses no column name").ok_or((StatusCode::UNAUTHORIZED, "Username or password incorrect.".into()))?;
-    let password_hash = PasswordHash::new(&user.password).map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("Database password hash error. Please contact the site owner. {e}")))?;
-
-    argon2.verify_password(form.password.as_bytes(), &password_hash).map_err(|e| match e {
-        password_hash::Error::Password => (StatusCode::UNAUTHORIZED, "Username or password incorrect.".into()),
-        e => (StatusCode::INTERNAL_SERVER_ERROR, format!("Database password verify error. Please contact the site owner. {e}"))
+    let user: LoginDatabaseResponse = prepared
+        .first(None)
+        .await
+        .expect("prepared.first should not fail, as it uses no column name")
+        .ok_or((
+            StatusCode::UNAUTHORIZED,
+            "Username or password incorrect.".into(),
+        ))?;
+    let password_hash = PasswordHash::new(&user.password).map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Database password hash error. Please contact the site owner. {e}"),
+        )
     })?;
-    
-    Ok(set_session(jar, SessionCookie { id: user.id, permission: user.permission }).expect("error serializing id and permission level to cookie"))
+
+    argon2
+        .verify_password(form.password.as_bytes(), &password_hash)
+        .map_err(|e| match e {
+            password_hash::Error::Password => (
+                StatusCode::UNAUTHORIZED,
+                "Username or password incorrect.".into(),
+            ),
+            e => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Database password verify error. Please contact the site owner. {e}"),
+            ),
+        })?;
+
+    Ok(set_session(
+        jar,
+        SessionCookie {
+            id: user.id,
+            permission: user.permission,
+        },
+    )
+    .expect("error serializing id and permission level to cookie"))
 }

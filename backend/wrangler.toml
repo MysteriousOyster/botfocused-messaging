@@ -42,6 +42,8 @@ database_name="bbcr"
 database_id="03f490ed-bd15-4d0c-ab2b-f25ef7bc895b"
 remote=true
 
+[env.dev]
+routes = []
 
 [[routes]]
 pattern="api.bot.leifbarton.dev"
