@@ -64,8 +64,12 @@ import { ClientRouter, fade } from "astro:transitions"
 	}
 	:global(input), :global(button) {
     font-family: inherit;
+    font-size: inherit;
     background-color: var(--bg-dark);
-    border: 1px var(--txt-main) solid;
+    padding: 2px 4px;
+    border-radius: 7px;
+    border: 2px var(--border-main) solid;
+    width: fit-content;
     color: inherit;
 	}
 	:global(input:disabled), :global(button:disabled) {
